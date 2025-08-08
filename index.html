@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>小学数学：认识多边形</title>
+    <meta name="description" content="互动式小学数学‘多边形’教学网页：定义、分类、周长、正多边形、拖拽分类练习、小测验。" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <h1>小学数学 · 认识多边形</h1>
+        <nav class="actions">
+          <button id="toggle-theme" class="ghost">切换主题</button>
+          <button id="print-handout" class="primary">打印讲义</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="intro" class="card">
+        <h2>什么是多边形？</h2>
+        <p>
+          多边形是由多条<strong>直线</strong>首尾相连形成的<strong>封闭</strong>图形。组成多边形的每一条直线叫做<strong>边</strong>，边与边相交的点叫做<strong>顶点</strong>，两条边形成的角叫做<strong>内角</strong>。
+        </p>
+        <div class="inline-showcase">
+          <svg viewBox="0 0 180 120" class="demo-svg" aria-label="标注边与顶点的五边形">
+            <polygon points="40,95 20,35 70,15 130,35 110,95" class="poly a"/>
+            <g class="labels">
+              <circle cx="40" cy="95" r="3"/><text x="35" y="110">顶点</text>
+              <line x1="20" y1="35" x2="70" y2="15" class="edge"/>
+              <text x="30" y="25">边</text>
+            </g>
+          </svg>
+          <ul>
+            <li><strong>必须是直线段</strong>；有曲线的不算多边形。</li>
+            <li><strong>必须首尾相连且封闭</strong>；开口的不算。</li>
+            <li><strong>不自相交</strong>；像五角星那样有交叉，在本章口径中不算。</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="kinds" class="card">
+        <h2>多边形的分类</h2>
+        <div class="grid two">
+          <div>
+            <h3>按边数命名</h3>
+            <ul class="tight">
+              <li>3 条边：三角形</li>
+              <li>4 条边：四边形（含正方形、长方形、平行四边形等）</li>
+              <li>5 条边：五边形</li>
+              <li>6 条边：六边形</li>
+              <li>…… 以此类推</li>
+            </ul>
+          </div>
+          <div>
+            <h3>按形状特点</h3>
+            <ul class="tight">
+              <li><strong>凸多边形</strong>：像“鼓起”的形状，内角都不超过 180°。</li>
+              <li><strong>凹多边形</strong>：像“凹进去”的形状，有一个内角大于 180°。</li>
+              <li><strong>正多边形</strong>：边相等、角相等（如正三角形、正六边形）。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="badge-row" aria-label="常见多边形示例">
+          <div class="badge"><svg viewBox="0 0 100 100"><polygon class="poly b" points="10,90 90,90 50,20"/></svg><span>三角形</span></div>
+          <div class="badge"><svg viewBox="0 0 100 100"><rect class="poly c" x="15" y="20" width="70" height="60"/></svg><span>四边形</span></div>
+          <div class="badge"><svg viewBox="0 0 100 100"><polygon class="poly d" points="20,80 10,45 35,20 65,20 90,45 80,80"/></svg><span>六边形</span></div>
+          <div class="badge"><svg viewBox="0 0 100 100"><polygon class="poly e" points="50,15 80,50 65,85 35,85 20,50"/></svg><span>五边形</span></div>
+        </div>
+      </section>
+
+      <section id="regular" class="card">
+        <h2>正多边形探索台</h2>
+        <div class="controls">
+          <label for="sides-range">边数 n：<span id="sides-value">5</span></label>
+          <input id="sides-range" type="range" min="3" max="12" step="1" value="5" />
+        </div>
+        <div class="regular-lab">
+          <svg id="regular-canvas" viewBox="0 0 400 300" aria-label="正多边形画布"></svg>
+          <div class="facts">
+            <p><strong>顶点数</strong>：<span id="facts-vertices">5</span></p>
+            <p><strong>边数</strong>：<span id="facts-edges">5</span></p>
+            <p class="muted">挑战（选学）：内角和 = (n − 2) × 180°，正多边形每个内角 = 内角和 ÷ n。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="perimeter" class="card">
+        <h2>周长与面积（入门）</h2>
+        <div class="grid two">
+          <div>
+            <h3>周长</h3>
+            <p>周长就是把所有边的长度加在一起。</p>
+            <div class="mini-ex">
+              <label>正多边形边长 = <input id="len-input" type="number" min="1" value="5"/>（同单位）</label>
+              <button id="calc-perimeter" class="ghost">计算周长</button>
+              <div id="perimeter-result" class="result" aria-live="polite"></div>
+            </div>
+          </div>
+          <div>
+            <h3>面积（常见图形）</h3>
+            <ul class="tight">
+              <li>长方形：面积 = 长 × 宽</li>
+              <li>正方形：面积 = 边长 × 边长</li>
+              <li>三角形：面积 = 底 × 高 ÷ 2</li>
+            </ul>
+            <p class="muted">更一般的多边形面积，会在更高年级学习。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="classify" class="card">
+        <h2>拖一拖：分分类</h2>
+        <p>把下面的图形拖到合适的框里。</p>
+        <div class="grid two">
+          <div class="dropzone" data-type="polygon" aria-label="多边形">
+            <h3>多边形</h3>
+            <div class="drop-here">拖到这里</div>
+          </div>
+          <div class="dropzone" data-type="non-polygon" aria-label="不是多边形">
+            <h3>不是多边形</h3>
+            <div class="drop-here">拖到这里</div>
+          </div>
+        </div>
+        <div id="cards" class="cards" aria-label="可拖拽的图形卡片"></div>
+        <button id="check-classify" class="primary">检查结果</button>
+        <div id="classify-feedback" class="result" aria-live="polite"></div>
+      </section>
+
+      <section id="quiz" class="card">
+        <h2>小测验</h2>
+        <div id="quiz-box" class="quiz-box">
+          <div id="quiz-question" class="question"></div>
+          <div id="quiz-options" class="options"></div>
+          <div class="quiz-actions">
+            <button id="quiz-next" class="primary" disabled>下一题</button>
+            <div id="quiz-progress" class="muted"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <small>© 2025 小学数学 · 多边形 | 适合课堂演示与居家练习</small>
+      </div>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
