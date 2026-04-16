@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>教师一键制作课程 PPT（Demo）</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --card: #ffffff;
+        --primary: #2f6fed;
+        --text: #1f2937;
+        --muted: #6b7280;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .container {
+        max-width: 980px;
+        margin: 36px auto;
+        padding: 0 16px;
+      }
+
+      .hero {
+        background: linear-gradient(135deg, #eaf1ff, #f8fbff);
+        border: 1px solid #dbe6ff;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+      }
+
+      .hero h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        padding: 16px;
+      }
+
+      label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 6px;
+      }
+
+      input,
+      select,
+      textarea,
+      button {
+        width: 100%;
+        font-size: 14px;
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+        padding: 10px;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      button {
+        background: var(--primary);
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      button:hover {
+        filter: brightness(0.95);
+      }
+
+      .result {
+        white-space: pre-wrap;
+        background: #f9fafb;
+        border: 1px dashed #c7d2fe;
+        border-radius: 10px;
+        padding: 12px;
+        min-height: 220px;
+        line-height: 1.6;
+      }
+
+      .footer {
+        text-align: center;
+        color: var(--muted);
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="hero">
+        <h1>老师一键制作课程 PPT（HTML Demo）</h1>
+        <p>输入课程信息 + 选择模板，点击生成即可得到一份可编辑的课件大纲。</p>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <label for="subject">课程主题</label>
+          <input id="subject" placeholder="如：二次函数入门" />
+
+          <label for="grade" style="margin-top: 12px">年级</label>
+          <select id="grade">
+            <option>小学</option>
+            <option>初中</option>
+            <option>高中</option>
+          </select>
+
+          <label for="template" style="margin-top: 12px">模板风格</label>
+          <select id="template">
+            <option>简洁教学风</option>
+            <option>活泼互动风</option>
+            <option>学术汇报风</option>
+          </select>
+
+          <label for="goals" style="margin-top: 12px">教学目标</label>
+          <textarea id="goals" placeholder="如：理解二次函数定义；掌握图像基本特征；能完成基础题。"></textarea>
+
+          <button id="generate" style="margin-top: 12px">一键生成 PPT 大纲</button>
+        </article>
+
+        <article class="card">
+          <h3 style="margin-top: 0">生成结果（示例）</h3>
+          <div id="result" class="result">点击左侧按钮后，这里将出现生成的大纲。</div>
+        </article>
+      </section>
+
+      <p class="footer">这是一个原型页面，后续可接入真实 AI API 和 PPT 导出能力。</p>
+    </main>
+
+    <script>
+      const generateBtn = document.getElementById("generate");
+      const result = document.getElementById("result");
+
+      generateBtn.addEventListener("click", () => {
+        const subject = document.getElementById("subject").value.trim() || "未填写主题";
+        const grade = document.getElementById("grade").value;
+        const template = document.getElementById("template").value;
+        const goals = document.getElementById("goals").value.trim() || "（未填写）";
+
+        result.textContent = `【课程信息】\n主题：${subject}\n年级：${grade}\n模板：${template}\n教学目标：${goals}\n\n【AI 生成课件大纲（Demo）】\n1. 导入：生活场景引入主题\n2. 新知讲解：核心概念 + 示例\n3. 课堂练习：由浅入深 3 道题\n4. 课堂总结：知识回顾 + 易错点\n5. 课后作业：分层作业建议\n\n提示：此页面目前使用本地模拟生成，后续可替换为真实 AI 输出。`;
+      });
+    </script>
+  </body>
+</html>
