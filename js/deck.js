@@ -98,13 +98,117 @@
     return goals.length ? goals.slice(0, 3) : DEFAULT_GOALS.slice();
   }
 
-  function buildOutline(input) {
+  // 各页正文的默认文字（本地模板）。AI 生成的内容使用同样的结构，缺什么就用这里的补上。
+  function defaultContent(subject) {
     return {
-      subject: String(input.subject || "").trim() || "未命名课程",
+      intro: {
+        question: `生活中，哪些现象和「${subject}」有关？`,
+        tip: "先请学生举例，再由例子引出本节课题",
+        steps: [
+          { title: "观察现象", desc: "展示图片或视频，唤起学生的生活经验" },
+          { title: "提出问题", desc: "引导学生说出心中的疑问" },
+          { title: "引出课题", desc: "顺势揭示本节课题和目标" },
+        ],
+      },
+      learn: {
+        steps: [
+          { title: "理解概念", desc: "用生活实例解释定义" },
+          { title: "例题示范", desc: "板书关键步骤，边讲边练" },
+          { title: "归纳方法", desc: "提炼通用的解题步骤" },
+        ],
+      },
+      practice: {
+        levels: [
+          { title: "基础题", desc: "巩固概念 · 约 3 分钟" },
+          { title: "提高题", desc: "综合运用 · 约 5 分钟" },
+          { title: "拓展题", desc: "迁移创新 · 约 7 分钟" },
+        ],
+      },
+      summary: { pitfalls: "概念理解不透彻 · 解题步骤有遗漏 · 审题不仔细" },
+      homework: {
+        tiers: [
+          { title: "课本基础练习", desc: "完成课本课后练习 1–3 题，巩固核心概念", note: "全体完成 · 约 15 分钟" },
+          { title: "综合应用练习", desc: "完成学习单上的综合题 2 道，尝试一题多解", note: "学有余力 · 约 10 分钟" },
+          { title: "开放探究任务", desc: "结合生活实际自拟一道题，并写出完整解答", note: "自愿挑战 · 不限时" },
+        ],
+      },
+      notes: [
+        "请 2～3 名学生分享生活中的例子，教师顺势板书课题。",
+        "先讲概念，再用例题示范步骤，最后和学生一起归纳方法。",
+        "三道题由易到难，巡视时多关注中等生，拓展题可以作为抢答题。",
+        "请学生对照目标自评，重点强调易错点。",
+        "说明分层作业要求，鼓励学有余力的同学挑战开放任务。",
+      ],
+    };
+  }
+
+  // 每类文字的长度上限，保证放得进版面
+  const LIMITS = { title: 8, desc: 26, question: 40, tip: 26, pitfalls: 40, note: 14, notes: 80, goal: 30 };
+
+  function clean(value, max, fallback) {
+    if (typeof value !== "string") return fallback;
+    const str = value.replace(/\s+/g, " ").trim();
+    if (!str) return fallback;
+    return str.length > max ? `${str.slice(0, max - 1)}…` : str;
+  }
+
+  function cleanItems(items, fallback, fields) {
+    return fallback.map((base, i) => {
+      const item = Array.isArray(items) && items[i] && typeof items[i] === "object" ? items[i] : {};
+      const out = {};
+      Object.keys(base).forEach((field) => {
+        out[field] = clean(item[field], LIMITS[fields[field]], base[field]);
+      });
+      return out;
+    });
+  }
+
+  // 把 AI 返回的内容与默认内容合并：只接受结构和长度都合适的字段
+  function mergeContent(base, ai) {
+    if (!ai || typeof ai !== "object") return base;
+    const pick = (key) => (ai[key] && typeof ai[key] === "object" ? ai[key] : {});
+    return {
+      intro: {
+        question: clean(pick("intro").question, LIMITS.question, base.intro.question),
+        tip: clean(pick("intro").tip, LIMITS.tip, base.intro.tip),
+        steps: cleanItems(pick("intro").steps, base.intro.steps, { title: "title", desc: "desc" }),
+      },
+      learn: { steps: cleanItems(pick("learn").steps, base.learn.steps, { title: "title", desc: "desc" }) },
+      practice: {
+        levels: cleanItems(pick("practice").levels, base.practice.levels, { title: "title", desc: "desc" }),
+      },
+      summary: { pitfalls: clean(pick("summary").pitfalls, LIMITS.pitfalls, base.summary.pitfalls) },
+      homework: {
+        tiers: cleanItems(pick("homework").tiers, base.homework.tiers, {
+          title: "title",
+          desc: "desc",
+          note: "note",
+        }),
+      },
+      notes: base.notes.map((note, i) => clean(Array.isArray(ai.notes) ? ai.notes[i] : null, LIMITS.notes, note)),
+    };
+  }
+
+  /**
+   * @param input 表单内容
+   * @param ai 可选，AI 生成的正文（结构同 defaultContent，另可带 goals）
+   */
+  function buildOutline(input, ai) {
+    const subject = String(input.subject || "").trim() || "未命名课程";
+    const typed = String(input.goals || "").trim();
+    // 老师填写了教学目标就以老师的为准；没填时才采用 AI 给出的目标
+    let goals = splitGoals(typed);
+    if (!typed && ai && Array.isArray(ai.goals)) {
+      const aiGoals = ai.goals.map((g) => clean(g, LIMITS.goal, "")).filter(Boolean).slice(0, 3);
+      if (aiGoals.length) goals = aiGoals;
+    }
+    return {
+      subject,
       grade: input.grade || "初中",
       template: THEMES[input.template] ? input.template : "简洁教学风",
-      goals: splitGoals(input.goals),
+      goals,
       sections: SECTIONS,
+      content: mergeContent(defaultContent(subject), ai),
     };
   }
 
@@ -258,12 +362,7 @@
   const BODY = [
     // 导入：情境问题 + 三个步骤
     function intro({ t, o }) {
-      const steps = [
-        ["观察现象", "展示图片或视频，唤起学生的生活经验"],
-        ["提出问题", "引导学生说出心中的疑问"],
-        ["引出课题", "顺势揭示本节课题和目标"],
-      ];
-      const question = `生活中，哪些现象和「${o.subject}」有关？`;
+      const { question, tip, steps } = o.content.intro;
       const els = [
         text("c0-q", 360, 184, 856, 196, question, {
           fill: t.tint,
@@ -274,13 +373,13 @@
           color: t.ink,
           lineHeight: 1.4,
         }),
-        text("c0-tip", 396, 318, 780, 40, "先请学生举例，再由例子引出本节课题", {
+        text("c0-tip", 396, 318, 780, 40, tip, {
           size: 20,
           color: t.muted,
           lineHeight: 1.6,
         }),
       ];
-      steps.forEach(([title, desc], j) => {
+      steps.forEach(({ title, desc }, j) => {
         const x = 360 + j * 292;
         els.push(
           shape(`c0-s${j}`, x, 408, 272, 244, { fill: t.panel, radius: t.radius, shadow: t.shadow }),
@@ -303,13 +402,9 @@
 
     // 新知讲解：三步流程 + 本课要点
     function learn({ t, o }) {
-      const steps = [
-        ["理解概念", "用生活实例解释定义"],
-        ["例题示范", "板书关键步骤，边讲边练"],
-        ["归纳方法", "提炼通用的解题步骤"],
-      ];
+      const { steps } = o.content.learn;
       const els = [];
-      steps.forEach(([title, desc], j) => {
+      steps.forEach(({ title, desc }, j) => {
         const x = 360 + j * 300;
         els.push(
           shape(`c1-b${j}`, x, 184, 256, 196, { fill: t.panel, radius: t.radius, shadow: t.shadow }),
@@ -338,19 +433,15 @@
     },
 
     // 课堂练习：难度逐级升高的三根柱子
-    function practice({ t }) {
-      const levels = [
-        ["基础题", "巩固概念 · 约 3 分钟"],
-        ["提高题", "综合运用 · 约 5 分钟"],
-        ["拓展题", "迁移创新 · 约 7 分钟"],
-      ];
+    function practice({ t, o }) {
+      const { levels } = o.content.practice;
       const heights = [150, 250, 350];
       const els = [
         text("c2-cap", 380, 184, 400, 32, "难度逐级提升", { size: 18, bold: true, color: t.muted }),
         shape("c2-axis", 380, BAR_BASE, 816, 3, { fill: t.muted, fillAlpha: 0.35 }),
         ...practiceBars(t, false),
       ];
-      levels.forEach(([title, desc], j) => {
+      levels.forEach(({ title, desc }, j) => {
         const x = 440 + j * 260;
         els.push(
           text(`c2-bar-${j}-t`, x - 20, BAR_BASE - heights[j] - 52, 220, 40, title, {
@@ -399,7 +490,7 @@
       els.push(
         shape("c3-warn", 360, 512, 856, 140, { fill: t.warm, fillAlpha: 0.16, radius: t.radius }),
         text("c3-warn-t", 392, 534, 300, 36, "易错提醒", { size: 22, bold: true, color: t.ink }),
-        text("c3-warn-d", 392, 580, 792, 40, "概念理解不透彻 · 解题步骤有遗漏 · 审题不仔细", {
+        text("c3-warn-d", 392, 580, 792, 40, o.content.summary.pitfalls, {
           size: 20,
           color: t.muted,
         }),
@@ -408,14 +499,15 @@
     },
 
     // 课后作业：必做 / 选做 / 挑战
-    function homework({ t }) {
-      const tiers = [
-        ["必做", t.accent, "课本基础练习", "完成课本课后练习 1–3 题，巩固核心概念", "全体完成 · 约 15 分钟"],
-        ["选做", t.primary, "综合应用练习", "完成学习单上的综合题 2 道，尝试一题多解", "学有余力 · 约 10 分钟"],
-        ["挑战", t.warm, "开放探究任务", "结合生活实际自拟一道题，并写出完整解答", "自愿挑战 · 不限时"],
+    function homework({ t, o }) {
+      const tags = [
+        ["必做", t.accent],
+        ["选做", t.primary],
+        ["挑战", t.warm],
       ];
       const els = [];
-      tiers.forEach(([tag, color, title, desc, note], j) => {
+      o.content.homework.tiers.forEach(({ title, desc, note }, j) => {
+        const [tag, color] = tags[j];
         const x = 360 + j * 292;
         els.push(
           shape(`c4-t${j}`, x, 184, 272, 468, { fill: t.panel, radius: t.radius, shadow: t.shadow }),
@@ -435,14 +527,6 @@
       });
       return els;
     },
-  ];
-
-  const BODY_NOTES = [
-    "请 2～3 名学生分享生活中的例子，教师顺势板书课题。",
-    "先讲概念，再用例题示范步骤，最后和学生一起归纳方法。",
-    "三道题由易到难，巡视时多关注中等生，拓展题可以作为抢答题。",
-    "请学生对照目标自评，重点强调易错点。",
-    "说明分层作业要求，鼓励学有余力的同学挑战开放任务。",
   ];
 
   // ---------- 各页 ----------
@@ -529,7 +613,7 @@
       shape("divider", 360, 152, 856, 2, { fill: t.accent, fillAlpha: 0.5, radius: 1 }),
       ...BODY[i](ctx),
     ];
-    return { label: `${section.title}：${section.body}`, bg: t.bg, notes: BODY_NOTES[i], elements: els };
+    return { label: `${section.title}：${section.body}`, bg: t.bg, notes: o.content.notes[i], elements: els };
   }
 
   function closing(ctx) {

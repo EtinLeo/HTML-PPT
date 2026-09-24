@@ -139,6 +139,25 @@
         outline-offset: 2px;
       }
 
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .check[hidden] {
+        display: none;
+      }
+
+      .check input {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+      }
+
       .status {
         margin: 0;
         min-height: 1.6em;
@@ -393,9 +412,14 @@
             </select>
           </div>
 
+          <label class="check" id="ai-option" hidden>
+            <input id="use-ai" type="checkbox" checked />
+            用 AI 生成课件正文
+          </label>
+
           <button class="btn" id="generate" type="submit">一键生成课件</button>
           <button class="btn secondary" id="export" type="button">导出 PPTX（含平滑切换）</button>
-          <p class="status" id="export-status" role="status" aria-live="polite"></p>
+          <p class="status" id="status" role="status" aria-live="polite"></p>
         </form>
 
         <article class="card player">
@@ -447,11 +471,16 @@
       const nextBtn = document.getElementById("next");
       const fullscreenBtn = document.getElementById("fullscreen");
       const exportBtn = document.getElementById("export");
-      const exportStatus = document.getElementById("export-status");
+      const statusLine = document.getElementById("status");
       const transitionSelect = document.getElementById("transition");
+      const generateBtn = document.getElementById("generate");
+      const aiOption = document.getElementById("ai-option");
+      const useAi = document.getElementById("use-ai");
 
       let outline = null;
       let scenes = [];
+      // 最近一次 AI 生成的正文；换模板、换年级时沿用，不重复调用 AI
+      let aiContent = null;
 
       const deck = new MorphDeck(viewport, {
         duration: 1200,
@@ -484,13 +513,17 @@
         );
       }
 
-      function generate({ keepPage = false } = {}) {
-        outline = CourseDeck.buildOutline({
+      function readForm() {
+        return {
           subject: document.getElementById("subject").value,
           grade: document.getElementById("grade").value,
           template: document.getElementById("template").value,
           goals: document.getElementById("goals").value,
-        });
+        };
+      }
+
+      function generate({ keepPage = false } = {}) {
+        outline = CourseDeck.buildOutline(readForm(), aiContent);
         scenes = CourseDeck.buildScenes(outline);
         const page = keepPage ? Math.max(deck.index, 0) : 0;
         renderSlideList();
@@ -498,11 +531,47 @@
         deck.load(page);
       }
 
-      form.addEventListener("submit", (event) => {
+      async function requestAi(input) {
+        const response = await fetch("api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subject: input.subject, grade: input.grade, goals: input.goals }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || `服务器返回 ${response.status}`);
+        return data.content;
+      }
+
+      form.addEventListener("submit", async (event) => {
         event.preventDefault();
+        aiContent = null;
+        if (!aiOption.hidden && useAi.checked) {
+          generateBtn.disabled = true;
+          statusLine.textContent = "AI 正在编写课件内容，大约需要 10～30 秒……";
+          try {
+            aiContent = await requestAi(readForm());
+            statusLine.textContent = "已用 AI 生成课件正文，可以直接翻页查看。";
+          } catch (error) {
+            statusLine.textContent = `AI 生成失败（${error.message}），已改用本地模板。`;
+          } finally {
+            generateBtn.disabled = false;
+          }
+        } else {
+          statusLine.textContent = "";
+        }
         generate();
         viewport.focus({ preventScroll: true });
       });
+
+      // 页面由 server.js 提供且服务器配置了密钥时，才显示「用 AI 生成」选项
+      if (location.protocol.startsWith("http")) {
+        fetch("api/health")
+          .then((response) => (response.ok ? response.json() : null))
+          .then((data) => {
+            aiOption.hidden = !(data && data.ai);
+          })
+          .catch(() => {});
+      }
 
       // 换模板或年级时直接重新生成，并停留在当前页
       document.getElementById("template").addEventListener("change", () => generate({ keepPage: true }));
@@ -521,7 +590,7 @@
       exportBtn.addEventListener("click", async () => {
         const fileName = `${outline.subject.replace(/[\\/:*?"<>|]/g, "_")}.pptx`;
         exportBtn.disabled = true;
-        exportStatus.textContent = "正在生成 PPTX……";
+        statusLine.textContent = "正在生成 PPTX……";
         try {
           await PptxExport.download(scenes, {
             title: outline.subject,
@@ -529,12 +598,12 @@
             mode: deck.mode,
             duration: deck.duration,
           });
-          exportStatus.textContent =
+          statusLine.textContent =
             deck.mode === "morph"
               ? `已导出「${fileName}」。用 PowerPoint 2019 及以上版本或 Microsoft 365 放映，即可看到平滑切换。`
               : `已导出「${fileName}」。`;
         } catch (error) {
-          exportStatus.textContent = `导出失败：${error.message}`;
+          statusLine.textContent = `导出失败：${error.message}`;
         } finally {
           exportBtn.disabled = false;
         }

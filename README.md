@@ -8,6 +8,7 @@
 - **三套模板**：简洁教学风、活泼互动风、学术汇报风。
 - **网页端平滑切换**：相邻两页中相同的元素会自动移动、缩放、变色，整套课件前后连贯。比如封面大标题缩成页眉，目录里的五张卡片收拢成侧边栏，侧边栏的高亮块随章节下移，练习页的柱形从基线长出来，结束页由侧边栏铺满整页。
 - **导出 PPTX**：导出的文件为每一页写入 PowerPoint 的平滑切换，并附带每页的讲解提示（写在备注里）。
+- **AI 生成正文**：部署 `server.js` 并配置 NVIDIA API 密钥后，可由 AI 按课题编写各页内容。
 - **放映**：点击画面、左右滑动、方向键 / 空格 / PageUp / PageDown 翻页，按 F 键或点「全屏放映」进入全屏。
 
 ## 使用
@@ -15,6 +16,51 @@
 用新版 Chrome、Edge、Safari 或 Firefox 直接打开 `index.html` 即可，不需要安装或构建。
 
 导出 PPTX 时会从 jsDelivr（备用 unpkg）加载 [PptxGenJS](https://github.com/gitbrent/PptxGenJS) 4.0.1，需要联网。平滑效果需要用 PowerPoint 2019 及以上版本或 Microsoft 365 放映；不支持平滑切换的软件会改用文件里预留的「淡出」切换。
+
+## AI 生成课件内容
+
+用 `server.js` 启动时，页面会出现「用 AI 生成课件正文」选项。服务器调用 NVIDIA 的模型接口（OpenAI 兼容格式），根据课题、年级和教学目标生成导入问题、讲解步骤、分层练习、易错点、分层作业和每页讲解提示；老师没填教学目标时也由 AI 拟定。AI 返回的每段文字都会按版面限制截断，缺失或格式不对的部分自动改用本地模板，AI 调用失败时整套课件也会退回本地模板。
+
+密钥只保存在服务器的环境变量里，浏览器只访问本服务的 `/api/generate`，看不到密钥。本地试用：
+
+```bash
+NVIDIA_API_KEY=你的密钥 node server.js   # 需要 Node.js 18 及以上
+# 打开 http://localhost:8080
+```
+
+| 环境变量 | 说明 | 默认值 |
+| --- | --- | --- |
+| `NVIDIA_API_KEY` | NVIDIA API 密钥（在 build.nvidia.com 申请） | 无，不填则只有本地模板 |
+| `NVIDIA_MODEL` | 模型名称 | `meta/llama-3.3-70b-instruct` |
+| `NVIDIA_BASE_URL` | 接口地址 | `https://integrate.api.nvidia.com/v1` |
+| `PORT` / `HOST` | 监听端口 / 地址 | `8080` / `0.0.0.0` |
+| `RATE_LIMIT` | 每个 IP 每分钟最多生成次数 | `6` |
+| `TRUST_PROXY` | 放在 Nginx 后面时设为 `1` | 关闭 |
+
+## 部署到服务器（以香港服务器为例）
+
+香港服务器可以直接访问 NVIDIA 接口和导出用的 CDN，内地访客访问也不需要备案。以下两种方式任选其一，配置文件都在 `deploy/` 目录。
+
+**方式一：Docker**
+
+```bash
+git clone https://github.com/EtinLeo/HTML-PPT.git /opt/html-ppt && cd /opt/html-ppt
+cp deploy/html-ppt.env.example .env && chmod 600 .env   # 填入密钥；HOST 改为 0.0.0.0
+docker build -t html-ppt .
+docker run -d --name html-ppt --restart unless-stopped --env-file .env -p 127.0.0.1:8080:8080 html-ppt
+```
+
+**方式二：systemd**（服务器需先安装 Node.js 18 及以上）
+
+```bash
+git clone https://github.com/EtinLeo/HTML-PPT.git /opt/html-ppt
+sudo cp /opt/html-ppt/deploy/html-ppt.env.example /etc/html-ppt.env   # 填入密钥
+sudo chmod 600 /etc/html-ppt.env
+sudo cp /opt/html-ppt/deploy/html-ppt.service /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now html-ppt
+```
+
+两种方式都只在本机 8080 端口监听，再用 Nginx 对外提供 HTTPS：把 `deploy/nginx.conf` 里的域名换成你的，放进 `/etc/nginx/conf.d/`，用 certbot 申请证书后 `nginx -s reload`。更新版本时 `git pull` 后重新构建镜像，或执行 `systemctl restart html-ppt`。
 
 ## 平滑切换的实现
 
@@ -61,6 +107,9 @@
 
 ```
 index.html          页面与交互
+server.js           静态文件 + AI 生成接口（/api/generate）
+Dockerfile          Docker 镜像
+deploy/             systemd、Nginx 配置和环境变量示例
 js/morph.js         网页版平滑切换引擎（MorphDeck）
 js/deck.js          课程大纲 → 课件页面描述，以及渲染成网页
 js/export-pptx.js   导出 .pptx 并写入平滑切换
@@ -68,5 +117,4 @@ js/export-pptx.js   导出 .pptx 并写入平滑切换
 
 ## 后续计划
 
-- 接入真实 AI 生成课件内容。模型的 API 密钥需要放在后端代理或服务器环境变量里，不能写进前端代码。
 - 支持在页面上直接编辑每页文字。

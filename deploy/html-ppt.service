@@ -1,0 +1,15 @@
+# systemd 服务：放到 /etc/systemd/system/html-ppt.service
+[Unit]
+Description=HTML-PPT 课件生成服务
+After=network-online.target
+
+[Service]
+WorkingDirectory=/opt/html-ppt
+EnvironmentFile=/etc/html-ppt.env
+ExecStart=/usr/bin/node /opt/html-ppt/server.js
+Restart=on-failure
+User=www-data
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
