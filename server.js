@@ -35,6 +35,12 @@ const STATIC_FILES = {
   "/js/morph.js": "js/morph.js",
   "/js/deck.js": "js/deck.js",
   "/js/export-pptx.js": "js/export-pptx.js",
+  "/samples/binary/": "samples/binary/index.html",
+  "/samples/binary/index.html": "samples/binary/index.html",
+  "/samples/binary/binary.js": "samples/binary/binary.js",
+  "/vendor/gsap/gsap.min.js": "vendor/gsap/gsap.min.js",
+  "/vendor/gsap/TextPlugin.min.js": "vendor/gsap/TextPlugin.min.js",
+  "/vendor/gsap/DrawSVGPlugin.min.js": "vendor/gsap/DrawSVGPlugin.min.js",
 };
 const MIME = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8" };
 
@@ -210,6 +216,10 @@ const server = http.createServer((req, res) => {
     });
   }
   if (req.method !== "GET" && req.method !== "HEAD") return sendJson(res, 405, { error: "Method not allowed" });
+  if (pathname === "/samples/binary") {
+    res.writeHead(301, { Location: "/samples/binary/" });
+    return res.end();
+  }
   return handleStatic(req, res, pathname);
 });
 

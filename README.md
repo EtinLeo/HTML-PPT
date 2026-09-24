@@ -11,6 +11,10 @@
 - **AI 生成正文**：部署 `server.js` 并配置 NVIDIA API 密钥后，可由 AI 按课题编写各页内容。
 - **放映**：点击画面、左右滑动、方向键 / 空格 / PageUp / PageDown 翻页，按 F 键或点「全屏放映」进入全屏。
 
+## 科普动画样片：认识二进制
+
+`samples/binary/` 是一份按科普视频风格制作的样片，用来探索比「卡片式」更精细的画面：纸面网格、粗体标题、矢量插图和字幕式解说，全程由一条 [GSAP](https://gsap.com) 时间线驱动（线条描画、打字字幕、数字滚动、柱形生长、像素翻转）。共 8 幕、18 步：点击画面或按方向键逐步讲解，也可以点「自动播放」像视频一样连续播放。GSAP 的核心和插件放在 `vendor/gsap/`，离线也能打开。
+
 ## 使用
 
 用新版 Chrome、Edge、Safari 或 Firefox 直接打开 `index.html` 即可，不需要安装或构建。
@@ -110,6 +114,8 @@ index.html          页面与交互
 server.js           静态文件 + AI 生成接口（/api/generate）
 Dockerfile          Docker 镜像
 deploy/             systemd、Nginx 配置和环境变量示例
+samples/binary/     科普动画样片「认识二进制」
+vendor/gsap/        GSAP 动画库（样片使用）
 js/morph.js         网页版平滑切换引擎（MorphDeck）
 js/deck.js          课程大纲 → 课件页面描述，以及渲染成网页
 js/export-pptx.js   导出 .pptx 并写入平滑切换
