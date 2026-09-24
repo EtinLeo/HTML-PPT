@@ -1049,16 +1049,23 @@
     updateUI();
   }
 
+  // 全屏：Safari（含 iPad）旧版本只支持带 webkit 前缀的接口
+  const fullscreenEnabled = Boolean(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+
   function toggleFullscreen() {
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    else if (frame.requestFullscreen) frame.requestFullscreen().catch(() => {});
+    const current = document.fullscreenElement || document.webkitFullscreenElement;
+    const call = current
+      ? document.exitFullscreen || document.webkitExitFullscreen
+      : frame.requestFullscreen || frame.webkitRequestFullscreen;
+    if (!call) return;
+    Promise.resolve(call.call(current ? document : frame)).catch(() => {});
   }
 
   document.getElementById("next").addEventListener("click", next);
   document.getElementById("prev").addEventListener("click", prev);
   playBtn.addEventListener("click", toggleAutoplay);
   const fullscreenBtn = document.getElementById("fullscreen");
-  fullscreenBtn.hidden = !document.fullscreenEnabled;
+  fullscreenBtn.hidden = !fullscreenEnabled;
   fullscreenBtn.addEventListener("click", toggleFullscreen);
 
   frame.addEventListener("click", (event) => {

@@ -201,6 +201,11 @@
         background: #000;
       }
 
+      .deck-viewport:-webkit-full-screen {
+        border-radius: 0;
+        background: #000;
+      }
+
       .deck-stage {
         position: absolute;
         left: 50%;
@@ -594,7 +599,7 @@
       prevBtn.addEventListener("click", () => deck.prev());
       nextBtn.addEventListener("click", () => deck.next());
 
-      fullscreenBtn.hidden = !document.fullscreenEnabled;
+      fullscreenBtn.hidden = !(document.fullscreenEnabled || document.webkitFullscreenEnabled);
       fullscreenBtn.addEventListener("click", () => deck.toggleFullscreen());
 
       exportBtn.addEventListener("click", async () => {

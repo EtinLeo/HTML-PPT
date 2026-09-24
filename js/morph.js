@@ -302,14 +302,17 @@
     }
 
     toggleFullscreen() {
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {});
-      } else if (this.viewport.requestFullscreen) {
-        this.viewport
-          .requestFullscreen()
-          .then(() => this.viewport.focus())
-          .catch(() => {});
-      }
+      // Safari（含 iPad）旧版本只支持带 webkit 前缀的接口
+      const current = document.fullscreenElement || document.webkitFullscreenElement;
+      const call = current
+        ? document.exitFullscreen || document.webkitExitFullscreen
+        : this.viewport.requestFullscreen || this.viewport.webkitRequestFullscreen;
+      if (!call) return;
+      Promise.resolve(call.call(current ? document : this.viewport))
+        .then(() => {
+          if (!current) this.viewport.focus();
+        })
+        .catch(() => {});
     }
 
     handleKey(event) {
