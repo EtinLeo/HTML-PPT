@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>二进制的秘密</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0d0d0f;
+        color: #e9e6df;
+        font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      }
+
+      .shell {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        min-height: 100%;
+        padding: 16px;
+      }
+
+      .frame {
+        position: relative;
+        width: min(100%, calc((100vh - 170px) * 16 / 9));
+        aspect-ratio: 16 / 9;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: pan-y;
+        outline: none;
+      }
+
+      .frame:focus-visible {
+        box-shadow: 0 0 0 3px #ffc21a;
+      }
+
+      .frame:fullscreen {
+        width: 100%;
+        background: #0d0d0f;
+        display: flex;
+        align-items: center;
+      }
+
+      .frame:-webkit-full-screen {
+        width: 100%;
+        background: #0d0d0f;
+        display: flex;
+        align-items: center;
+      }
+
+      #stage {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 100%;
+      }
+
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      .bar button {
+        font: inherit;
+        color: #e9e6df;
+        background: #1c1c20;
+        border: 1px solid #34343a;
+        border-radius: 8px;
+        padding: 7px 14px;
+        cursor: pointer;
+      }
+
+      .bar button:hover {
+        background: #26262b;
+      }
+
+      .bar button:focus-visible {
+        outline: 2px solid #ffc21a;
+        outline-offset: 2px;
+      }
+
+      .bar .step {
+        min-width: 70px;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+        color: #a7a39a;
+      }
+
+      .bar a {
+        color: #a7a39a;
+      }
+
+      .note {
+        width: min(100%, 960px);
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #c9c5bc;
+      }
+
+      .note strong {
+        margin-right: 10px;
+        color: #ffc21a;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <div class="frame" id="frame" tabindex="0" aria-label="二进制的秘密，点击或按方向键播放下一步">
+        <svg id="stage" viewBox="0 0 1920 1080" role="img" aria-labelledby="stage-title">
+          <title id="stage-title">二进制的秘密</title>
+        </svg>
+      </div>
+      <div class="bar">
+        <button type="button" id="prev">上一步</button>
+        <button type="button" id="play">自动播放</button>
+        <button type="button" id="next">下一步</button>
+        <span class="step" id="step"></span>
+        <button type="button" id="fullscreen">全屏</button>
+        <a href="../../index.html">返回课件生成器</a>
+      </div>
+      <p class="note"><strong>教学提示</strong><span id="note"></span></p>
+    </main>
+
+    <script src="../../vendor/gsap/gsap.min.js"></script>
+    <script src="../../vendor/gsap/TextPlugin.min.js"></script>
+    <script src="../../vendor/gsap/DrawSVGPlugin.min.js"></script>
+    <script src="binary.js"></script>
+  </body>
+</html>

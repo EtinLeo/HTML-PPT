@@ -11,6 +11,10 @@
         --primary: #2f6fed;
         --text: #1f2937;
         --muted: #6b7280;
+        --line: #e5e7eb;
+        --field-line: #d1d5db;
+        --soft: #eaf1ff;
+        --focus: rgba(47, 111, 237, 0.45);
       }
 
       * {
@@ -25,7 +29,7 @@
       }
 
       .container {
-        max-width: 980px;
+        max-width: 1240px;
         margin: 36px auto;
         padding: 0 16px;
       }
@@ -46,19 +50,42 @@
       .hero p {
         margin: 0;
         color: var(--muted);
+        line-height: 1.6;
+        max-width: 60em;
       }
 
-      .grid {
+      .hero .sample-link {
+        margin-top: 10px;
+      }
+
+      .sample-link a {
+        color: var(--primary);
+        font-weight: 600;
+      }
+
+      .layout {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
         gap: 16px;
+        align-items: start;
       }
 
       .card {
         background: var(--card);
         border-radius: 12px;
-        border: 1px solid #e5e7eb;
+        border: 1px solid var(--line);
         padding: 16px;
+      }
+
+      .card h3 {
+        margin: 0 0 12px;
+        font-size: 16px;
+      }
+
+      .form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
       }
 
       label {
@@ -67,42 +94,274 @@
         margin-bottom: 6px;
       }
 
-      input,
-      select,
-      textarea,
-      button {
+      .field input,
+      .field select,
+      .field textarea {
         width: 100%;
+        font: inherit;
         font-size: 14px;
+        color: inherit;
+        background: #fff;
         border-radius: 10px;
-        border: 1px solid #d1d5db;
+        border: 1px solid var(--field-line);
         padding: 10px;
       }
 
-      textarea {
-        min-height: 120px;
+      .field textarea {
+        min-height: 110px;
         resize: vertical;
       }
 
-      button {
-        background: var(--primary);
-        color: white;
-        border: none;
-        cursor: pointer;
+      .btn {
+        width: 100%;
+        font: inherit;
+        font-size: 14px;
         font-weight: 600;
+        border-radius: 10px;
+        border: none;
+        padding: 11px 10px;
+        background: var(--primary);
+        color: #fff;
+        cursor: pointer;
       }
 
-      button:hover {
+      .btn:hover {
         filter: brightness(0.95);
       }
 
-      .result {
-        white-space: pre-wrap;
+      .btn.secondary {
+        background: var(--soft);
+        color: var(--primary);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: progress;
+      }
+
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible,
+      .deck-viewport:focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: 2px;
+      }
+
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .check[hidden] {
+        display: none;
+      }
+
+      .check input {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+      }
+
+      .status {
+        margin: 0;
+        min-height: 1.6em;
+        font-size: 13px;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .player {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      /* ---------- 课件播放器 ---------- */
+
+      .deck-viewport {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        border-radius: 10px;
+        background: #0f172a;
+        cursor: pointer;
+        touch-action: pan-y;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      .deck-viewport:fullscreen {
+        border-radius: 0;
+        background: #000;
+      }
+
+      .deck-viewport:-webkit-full-screen {
+        border-radius: 0;
+        background: #000;
+      }
+
+      .deck-stage {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 1280px;
+        height: 720px;
+        overflow: hidden;
+        transform-origin: 50% 50%;
+        font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", "WenQuanYi Zen Hei",
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: none;
+      }
+
+      /* 切换时两页同时显示；页面本身不设 z-index，前后层次由 morph.js 逐个元素排定 */
+      .slide.is-active,
+      .slide.is-leaving {
+        display: block;
+      }
+
+      .m {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        border: 0 solid transparent;
+        overflow-wrap: break-word;
+      }
+
+      .m p {
+        margin: 0;
+      }
+
+      .m p + p {
+        margin-top: 0.35em;
+      }
+
+      .m .bullet {
+        position: relative;
+        padding-left: 1em;
+      }
+
+      .m .bullet::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .nav-btn {
+        width: 40px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid var(--field-line);
+        background: #fff;
+        color: var(--text);
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .nav-btn:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+
+      .counter {
+        min-width: 64px;
+        text-align: center;
+        font-size: 14px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .hint {
+        flex: 1;
+        min-width: 12em;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .text-btn {
+        border: 1px solid var(--field-line);
+        background: #fff;
+        color: var(--text);
+        border-radius: 10px;
+        padding: 8px 12px;
+        font: inherit;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .notes {
         background: #f9fafb;
         border: 1px dashed #c7d2fe;
         border-radius: 10px;
-        padding: 12px;
-        min-height: 220px;
+        padding: 12px 14px;
+      }
+
+      .notes h3 {
+        margin: 0 0 4px;
+        font-size: 14px;
+      }
+
+      .notes p {
+        margin: 0;
         line-height: 1.6;
+      }
+
+      .outline {
+        margin-top: 16px;
+      }
+
+      .slide-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 8px;
+      }
+
+      .slide-list button {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        width: 100%;
+        text-align: left;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--text);
+        border-radius: 10px;
+        padding: 8px 10px;
+        font: inherit;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .slide-list button[aria-current="true"] {
+        border-color: var(--primary);
+        background: var(--soft);
+      }
+
+      .slide-list .no {
+        color: var(--primary);
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
       }
 
       .footer {
@@ -110,61 +369,262 @@
         color: var(--muted);
         margin-top: 20px;
       }
+
+      @media (max-width: 860px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
     </style>
   </head>
   <body>
     <main class="container">
       <section class="hero">
         <h1>老师一键制作课程 PPT（HTML Demo）</h1>
-        <p>输入课程信息 + 选择模板，点击生成即可得到一份可编辑的课件大纲。</p>
+        <p>
+          输入课程信息并选择模板，一键生成整套课件。页与页之间使用「平滑」切换：相同的元素会自动移动、缩放和变色，
+          目录卡片会收拢成侧边栏，练习页的柱形会从基线长出来，整套课件前后连贯。导出的 PPTX 同样带有 PowerPoint 的平滑切换。
+        </p>
+        <p class="sample-link"><a href="samples/binary/">看看科普动画风格的样片课：二进制的秘密（六年级上册）→</a></p>
       </section>
 
-      <section class="grid">
-        <article class="card">
-          <label for="subject">课程主题</label>
-          <input id="subject" placeholder="如：二次函数入门" />
+      <section class="layout">
+        <form class="card form" id="course-form">
+          <div class="field">
+            <label for="subject">课程主题</label>
+            <input id="subject" value="二次函数入门" placeholder="如：二次函数入门" maxlength="40" />
+          </div>
 
-          <label for="grade" style="margin-top: 12px">年级</label>
-          <select id="grade">
-            <option>小学</option>
-            <option>初中</option>
-            <option>高中</option>
-          </select>
+          <div class="field">
+            <label for="grade">年级</label>
+            <select id="grade">
+              <option>小学</option>
+              <option selected>初中</option>
+              <option>高中</option>
+            </select>
+          </div>
 
-          <label for="template" style="margin-top: 12px">模板风格</label>
-          <select id="template">
-            <option>简洁教学风</option>
-            <option>活泼互动风</option>
-            <option>学术汇报风</option>
-          </select>
+          <div class="field">
+            <label for="template">模板风格</label>
+            <select id="template">
+              <option>简洁教学风</option>
+              <option>活泼互动风</option>
+              <option>学术汇报风</option>
+            </select>
+          </div>
 
-          <label for="goals" style="margin-top: 12px">教学目标</label>
-          <textarea id="goals" placeholder="如：理解二次函数定义；掌握图像基本特征；能完成基础题。"></textarea>
+          <div class="field">
+            <label for="goals">教学目标</label>
+            <textarea id="goals" placeholder="如：理解二次函数定义；掌握图像基本特征；能完成基础题。">理解二次函数的定义；掌握图像的基本特征；能完成基础题。</textarea>
+          </div>
 
-          <button id="generate" style="margin-top: 12px">一键生成 PPT 大纲</button>
-        </article>
+          <div class="field">
+            <label for="transition">切换效果</label>
+            <select id="transition">
+              <option value="morph">平滑（推荐）</option>
+              <option value="fade">淡入淡出</option>
+              <option value="none">无切换效果</option>
+            </select>
+          </div>
 
-        <article class="card">
-          <h3 style="margin-top: 0">生成结果（示例）</h3>
-          <div id="result" class="result">点击左侧按钮后，这里将出现生成的大纲。</div>
+          <label class="check" id="ai-option" hidden>
+            <input id="use-ai" type="checkbox" checked />
+            用 AI 生成课件正文
+          </label>
+
+          <button class="btn" id="generate" type="submit">一键生成课件</button>
+          <button class="btn secondary" id="export" type="button">导出 PPTX（含平滑切换）</button>
+          <p class="status" id="status" role="status" aria-live="polite"></p>
+        </form>
+
+        <article class="card player">
+          <div
+            class="deck-viewport"
+            id="viewport"
+            tabindex="0"
+            role="region"
+            aria-roledescription="幻灯片"
+            aria-label="课件预览，按左右方向键翻页"
+          >
+            <div class="deck-stage" id="stage"></div>
+          </div>
+
+          <div class="controls">
+            <button class="nav-btn" id="prev" type="button" aria-label="上一页">‹</button>
+            <span class="counter" id="counter" aria-live="polite"></span>
+            <button class="nav-btn" id="next" type="button" aria-label="下一页">›</button>
+            <span class="hint">点击画面、左右滑动或按 ← → 键翻页</span>
+            <button class="text-btn" id="fullscreen" type="button">全屏放映</button>
+          </div>
+
+          <div class="notes">
+            <h3>讲解提示</h3>
+            <p id="notes"></p>
+          </div>
         </article>
       </section>
 
-      <p class="footer">这是一个原型页面，后续可接入真实 AI API 和 PPT 导出能力。</p>
+      <section class="card outline">
+        <h3>课件结构</h3>
+        <ol class="slide-list" id="slide-list"></ol>
+      </section>
+
+      <p class="footer">这是一个原型页面：课件内容目前由本地模板生成，后续可接入真实 AI 生成内容。</p>
     </main>
 
+    <script src="js/morph.js"></script>
+    <script src="js/deck.js"></script>
+    <script src="js/export-pptx.js"></script>
     <script>
+      const form = document.getElementById("course-form");
+      const viewport = document.getElementById("viewport");
+      const stage = document.getElementById("stage");
+      const counter = document.getElementById("counter");
+      const notes = document.getElementById("notes");
+      const slideList = document.getElementById("slide-list");
+      const prevBtn = document.getElementById("prev");
+      const nextBtn = document.getElementById("next");
+      const fullscreenBtn = document.getElementById("fullscreen");
+      const exportBtn = document.getElementById("export");
+      const statusLine = document.getElementById("status");
+      const transitionSelect = document.getElementById("transition");
       const generateBtn = document.getElementById("generate");
-      const result = document.getElementById("result");
+      const aiOption = document.getElementById("ai-option");
+      const useAi = document.getElementById("use-ai");
 
-      generateBtn.addEventListener("click", () => {
-        const subject = document.getElementById("subject").value.trim() || "未填写主题";
-        const grade = document.getElementById("grade").value;
-        const template = document.getElementById("template").value;
-        const goals = document.getElementById("goals").value.trim() || "（未填写）";
+      let outline = null;
+      let scenes = [];
+      // 最近一次 AI 生成的正文；换模板、换年级时沿用，不重复调用 AI
+      let aiContent = null;
 
-        result.textContent = `【课程信息】\n主题：${subject}\n年级：${grade}\n模板：${template}\n教学目标：${goals}\n\n【AI 生成课件大纲（Demo）】\n1. 导入：生活场景引入主题\n2. 新知讲解：核心概念 + 示例\n3. 课堂练习：由浅入深 3 道题\n4. 课堂总结：知识回顾 + 易错点\n5. 课后作业：分层作业建议\n\n提示：此页面目前使用本地模拟生成，后续可替换为真实 AI 输出。`;
+      const deck = new MorphDeck(viewport, {
+        duration: 1200,
+        mode: transitionSelect.value,
+        onChange(index, total) {
+          counter.textContent = `${index + 1} / ${total}`;
+          notes.textContent = scenes[index].notes;
+          prevBtn.disabled = index === 0;
+          nextBtn.disabled = index === total - 1;
+          slideList.querySelectorAll("button").forEach((button, i) => {
+            button.setAttribute("aria-current", String(i === index));
+          });
+        },
       });
+
+      function renderSlideList() {
+        slideList.replaceChildren(
+          ...scenes.map((scene, i) => {
+            const item = document.createElement("li");
+            const button = document.createElement("button");
+            button.type = "button";
+            const no = document.createElement("span");
+            no.className = "no";
+            no.textContent = String(i + 1).padStart(2, "0");
+            button.append(no, scene.label);
+            button.addEventListener("click", () => deck.go(i));
+            item.append(button);
+            return item;
+          }),
+        );
+      }
+
+      function readForm() {
+        return {
+          subject: document.getElementById("subject").value,
+          grade: document.getElementById("grade").value,
+          template: document.getElementById("template").value,
+          goals: document.getElementById("goals").value,
+        };
+      }
+
+      function generate({ keepPage = false } = {}) {
+        outline = CourseDeck.buildOutline(readForm(), aiContent);
+        scenes = CourseDeck.buildScenes(outline);
+        const page = keepPage ? Math.max(deck.index, 0) : 0;
+        renderSlideList();
+        stage.replaceChildren(...scenes.map(CourseDeck.renderScene));
+        deck.load(page);
+      }
+
+      async function requestAi(input) {
+        const response = await fetch("api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subject: input.subject, grade: input.grade, goals: input.goals }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || `服务器返回 ${response.status}`);
+        return data.content;
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        aiContent = null;
+        if (!aiOption.hidden && useAi.checked) {
+          generateBtn.disabled = true;
+          statusLine.textContent = "AI 正在编写课件内容，大约需要 10～30 秒……";
+          try {
+            aiContent = await requestAi(readForm());
+            statusLine.textContent = "已用 AI 生成课件正文，可以直接翻页查看。";
+          } catch (error) {
+            statusLine.textContent = `AI 生成失败（${error.message}），已改用本地模板。`;
+          } finally {
+            generateBtn.disabled = false;
+          }
+        } else {
+          statusLine.textContent = "";
+        }
+        generate();
+        viewport.focus({ preventScroll: true });
+      });
+
+      // 页面由 server.js 提供且服务器配置了密钥时，才显示「用 AI 生成」选项
+      if (location.protocol.startsWith("http")) {
+        fetch("api/health")
+          .then((response) => (response.ok ? response.json() : null))
+          .then((data) => {
+            aiOption.hidden = !(data && data.ai);
+          })
+          .catch(() => {});
+      }
+
+      // 换模板或年级时直接重新生成，并停留在当前页
+      document.getElementById("template").addEventListener("change", () => generate({ keepPage: true }));
+      document.getElementById("grade").addEventListener("change", () => generate({ keepPage: true }));
+
+      transitionSelect.addEventListener("change", () => {
+        deck.mode = transitionSelect.value;
+      });
+
+      prevBtn.addEventListener("click", () => deck.prev());
+      nextBtn.addEventListener("click", () => deck.next());
+
+      fullscreenBtn.hidden = !(document.fullscreenEnabled || document.webkitFullscreenEnabled);
+      fullscreenBtn.addEventListener("click", () => deck.toggleFullscreen());
+
+      exportBtn.addEventListener("click", async () => {
+        const fileName = `${outline.subject.replace(/[\\/:*?"<>|]/g, "_")}.pptx`;
+        exportBtn.disabled = true;
+        statusLine.textContent = "正在生成 PPTX……";
+        try {
+          await PptxExport.download(scenes, {
+            title: outline.subject,
+            fileName,
+            mode: deck.mode,
+            duration: deck.duration,
+          });
+          statusLine.textContent =
+            deck.mode === "morph"
+              ? `已导出「${fileName}」。用 PowerPoint 2019 及以上版本或 Microsoft 365 放映，即可看到平滑切换。`
+              : `已导出「${fileName}」。`;
+        } catch (error) {
+          statusLine.textContent = `导出失败：${error.message}`;
+        } finally {
+          exportBtn.disabled = false;
+        }
+      });
+
+      generate();
     </script>
   </body>
 </html>
