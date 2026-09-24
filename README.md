@@ -60,7 +60,7 @@ sudo cp /opt/html-ppt/deploy/html-ppt.service /etc/systemd/system/
 sudo systemctl daemon-reload && sudo systemctl enable --now html-ppt
 ```
 
-两种方式都只在本机 8080 端口监听，再用 Nginx 对外提供 HTTPS：把 `deploy/nginx.conf` 里的域名换成你的，放进 `/etc/nginx/conf.d/`，用 certbot 申请证书后 `nginx -s reload`。更新版本时 `git pull` 后重新构建镜像，或执行 `systemctl restart html-ppt`。
+两种方式都只在本机 8080 端口监听，再用 Nginx 对外提供 HTTPS：把 `deploy/nginx.conf`（已按 ppt.meridion.com 配好）放进 `/etc/nginx/conf.d/`，用 certbot 申请证书后 `nginx -s reload`。更新版本时 `git pull` 后重新构建镜像，或执行 `systemctl restart html-ppt`。
 
 ## 平滑切换的实现
 
