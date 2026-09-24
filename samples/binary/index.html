@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>认识二进制（科普动画样片）</title>
+    <title>二进制的秘密</title>
     <style>
       * {
         box-sizing: border-box;
@@ -30,7 +30,7 @@
 
       .frame {
         position: relative;
-        width: min(100%, calc((100vh - 110px) * 16 / 9));
+        width: min(100%, calc((100vh - 170px) * 16 / 9));
         aspect-ratio: 16 / 9;
         cursor: pointer;
         user-select: none;
@@ -95,13 +95,26 @@
       .bar a {
         color: #a7a39a;
       }
+
+      .note {
+        width: min(100%, 960px);
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #c9c5bc;
+      }
+
+      .note strong {
+        margin-right: 10px;
+        color: #ffc21a;
+      }
     </style>
   </head>
   <body>
     <main class="shell">
-      <div class="frame" id="frame" tabindex="0" aria-label="认识二进制，点击或按方向键播放下一步">
+      <div class="frame" id="frame" tabindex="0" aria-label="二进制的秘密，点击或按方向键播放下一步">
         <svg id="stage" viewBox="0 0 1920 1080" role="img" aria-labelledby="stage-title">
-          <title id="stage-title">认识二进制</title>
+          <title id="stage-title">二进制的秘密</title>
         </svg>
       </div>
       <div class="bar">
@@ -112,6 +125,7 @@
         <button type="button" id="fullscreen">全屏</button>
         <a href="../../index.html">返回课件生成器</a>
       </div>
+      <p class="note"><strong>教学提示</strong><span id="note"></span></p>
     </main>
 
     <script src="../../vendor/gsap/gsap.min.js"></script>
